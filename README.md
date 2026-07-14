@@ -29,7 +29,7 @@ swift test
 ./script/build_and_run.sh
 ```
 
-The app reproduces the original movement keys through its Mazewar menu and visible controls:
+The app captures the original movement keys whenever its window is frontmost; the Mazewar menu and visible controls offer equivalent mouse access:
 
 - `A`: about face
 - `S`: turn left
@@ -38,6 +38,7 @@ The app reproduces the original movement keys through its Mazewar menu and visib
 - `Space`: move backward one maze square
 - `[` / `]`: peek left / right around an open corner
 - `R`: fire
+- `N`: reset the local game
 
 `Command-Q` is the macOS equivalent of the historical `Q` exit key. Firing immediately costs one point. A shot delivered after one second costs the target five points and respawns them; a confirmed hit leaves the shooter ten points ahead overall.
 

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import MazewarCore
 import Observation
@@ -9,6 +10,7 @@ final class MazewarViewModel {
   var remotePlayers: [UUID: PlayerSnapshot] = [:]
   var statusMessage = "Ready to enter the original Alto maze."
   let peers = PeerSession()
+  @ObservationIgnored private var keyboardMonitor: Any?
 
   init() {
     peers.onMessage = { [weak self] message in
@@ -52,6 +54,20 @@ final class MazewarViewModel {
     broadcastState()
   }
 
+  func startKeyboardMonitoring() {
+    guard keyboardMonitor == nil else { return }
+    keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+      guard let self else { return event }
+      return self.handleKeyboard(event) ? nil : event
+    }
+  }
+
+  func stopKeyboardMonitoring() {
+    guard let keyboardMonitor else { return }
+    NSEvent.removeMonitor(keyboardMonitor)
+    self.keyboardMonitor = nil
+  }
+
   private func receive(_ message: NetworkMessage) {
     switch message {
     case let .player(snapshot):
@@ -80,6 +96,27 @@ final class MazewarViewModel {
 
   private func broadcastState() {
     peers.send(.player(match.player))
+  }
+
+  private func handleKeyboard(_ event: NSEvent) -> Bool {
+    let reservedModifiers: NSEvent.ModifierFlags = [.command, .control, .option]
+    guard NSApp.isActive,
+      event.modifierFlags.intersection(reservedModifiers).isEmpty,
+      let characters = event.charactersIgnoringModifiers,
+      let command = KeyboardControls.command(for: characters)
+    else { return false }
+
+    switch command {
+    case let .action(action):
+      apply(action)
+    case .fire:
+      fire()
+    case .stopPeeking:
+      stopPeeking()
+    case .resetLocalGame:
+      resetLocalGame()
+    }
+    return true
   }
 
   private func description(for action: PlayerAction) -> String {

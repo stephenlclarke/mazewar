@@ -159,7 +159,7 @@ public enum NetworkMessage: Codable, Sendable {
   case death(DeathNotice)
 }
 
-public enum PlayerAction: Sendable {
+public enum PlayerAction: Equatable, Sendable {
   case forward
   case backward
   case turnLeft
@@ -167,6 +167,31 @@ public enum PlayerAction: Sendable {
   case turnAround
   case peekLeft
   case peekRight
+}
+
+public enum KeyboardCommand: Equatable, Sendable {
+  case action(PlayerAction)
+  case fire
+  case stopPeeking
+  case resetLocalGame
+}
+
+public enum KeyboardControls {
+  public static func command(for characters: String) -> KeyboardCommand? {
+    switch characters.lowercased() {
+    case "a": .action(.turnAround)
+    case "s": .action(.turnLeft)
+    case "d": .action(.forward)
+    case "f": .action(.turnRight)
+    case " ": .action(.backward)
+    case "[": .action(.peekLeft)
+    case "]": .action(.peekRight)
+    case "\\": .stopPeeking
+    case "r": .fire
+    case "n": .resetLocalGame
+    default: nil
+    }
+  }
 }
 
 public struct MatchState: Sendable {

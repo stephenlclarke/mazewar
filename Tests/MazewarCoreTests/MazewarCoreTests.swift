@@ -35,6 +35,20 @@ import Testing
   #expect(match.player.position == GridPoint(column: 1, row: 1))
 }
 
+@Test func keyboardControlsMapEachGameplayKeyToItsGameCommand() {
+  #expect(KeyboardControls.command(for: "A") == .action(.turnAround))
+  #expect(KeyboardControls.command(for: "s") == .action(.turnLeft))
+  #expect(KeyboardControls.command(for: "d") == .action(.forward))
+  #expect(KeyboardControls.command(for: "F") == .action(.turnRight))
+  #expect(KeyboardControls.command(for: " ") == .action(.backward))
+  #expect(KeyboardControls.command(for: "[") == .action(.peekLeft))
+  #expect(KeyboardControls.command(for: "]") == .action(.peekRight))
+  #expect(KeyboardControls.command(for: "\\") == .stopPeeking)
+  #expect(KeyboardControls.command(for: "r") == .fire)
+  #expect(KeyboardControls.command(for: "N") == .resetLocalGame)
+  #expect(KeyboardControls.command(for: "q") == nil)
+}
+
 @Test func peekingMovesOnlyTheViewpointAroundAnOpenCorner() {
   let arena = Arena(columns: 4, rows: 4)
   var match = MatchState(
