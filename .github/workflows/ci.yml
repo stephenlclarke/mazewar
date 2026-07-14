@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, test, and check coverage
+        run: make coverage-check
+      - name: Publish SonarQube analysis
+        if: github.event_name == 'push' && github.repository == 'stephenlclarke/mazewar'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [[ -z "$SONAR_TOKEN" ]]; then
+            echo "SONAR_TOKEN is not configured; skipping analysis."
+            exit 0
+          fi
+          make sonar-scan
