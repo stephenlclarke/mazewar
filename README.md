@@ -30,8 +30,6 @@ players.
 
 ## Quality workflow
 
-The project follows the `container-compose` SonarQube contract:
-
 ```sh
 make coverage-check
 make sonar
