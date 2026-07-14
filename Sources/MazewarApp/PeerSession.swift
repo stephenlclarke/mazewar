@@ -8,7 +8,7 @@ import Observation
 final class PeerSession: NSObject {
   var connectedPeerNames: [String] = []
   var isRunning = false
-  var onSnapshot: ((PlayerSnapshot) -> Void)?
+  var onMessage: ((NetworkMessage) -> Void)?
 
   private let peerID: MCPeerID
   nonisolated(unsafe) private let session: MCSession
@@ -35,8 +35,8 @@ final class PeerSession: NSObject {
     isRunning = true
   }
 
-  func send(_ snapshot: PlayerSnapshot) {
-    guard !session.connectedPeers.isEmpty, let data = try? JSONEncoder().encode(snapshot) else {
+  func send(_ message: NetworkMessage) {
+    guard !session.connectedPeers.isEmpty, let data = try? JSONEncoder().encode(message) else {
       return
     }
     try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
@@ -55,8 +55,8 @@ extension PeerSession: MCSessionDelegate {
   }
 
   nonisolated func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-    guard let snapshot = try? JSONDecoder().decode(PlayerSnapshot.self, from: data) else { return }
-    Task { @MainActor in onSnapshot?(snapshot) }
+    guard let message = try? JSONDecoder().decode(NetworkMessage.self, from: data) else { return }
+    Task { @MainActor in onMessage?(message) }
   }
 
   nonisolated func session(

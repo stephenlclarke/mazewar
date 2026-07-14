@@ -5,65 +5,75 @@ struct MazewarContentView: View {
   @Bindable var model: MazewarViewModel
 
   var body: some View {
-    NavigationSplitView {
-      List {
-        Section("Nearby players") {
-          if model.peers.connectedPeerNames.isEmpty {
-            Text("No players connected")
-              .foregroundStyle(.secondary)
-          } else {
-            ForEach(model.peers.connectedPeerNames, id: \.self, content: Text.init)
-          }
-        }
-        Section("Scoreboard") {
-          Text("\(model.match.player.name) (you) · \(model.match.player.score)")
-          ForEach(model.visiblePlayers) { player in
-            Text("\(player.name) · \(player.score)")
-          }
-        }
-      }
-      .navigationTitle("Mazewar")
-      .safeAreaInset(edge: .bottom) {
-        Button(model.peers.isRunning ? "Nearby Session Active" : "Start Nearby Session") {
-          model.startNearbySession()
-        }
-        .disabled(model.peers.isRunning)
-        .buttonStyle(.borderedProminent)
-        .padding()
-      }
-    } detail: {
-      VStack(spacing: 12) {
+    VStack(spacing: 12) {
+      PerspectiveView(
+        arena: model.match.arena,
+        viewpoint: model.match.viewpoint,
+        opponents: model.visiblePlayers
+      )
+      .frame(minWidth: 680, idealWidth: 800, minHeight: 260, idealHeight: 340)
+
+      HStack(alignment: .top, spacing: 16) {
         ArenaCanvas(
           arena: model.match.arena, player: model.match.player, opponents: model.visiblePlayers
         )
-        .frame(minWidth: 640, minHeight: 430)
-        .padding(.horizontal)
-        Text(model.statusMessage)
-          .foregroundStyle(.secondary)
-        HStack {
-          Button("Turn Left", systemImage: "arrow.counterclockwise") { model.apply(.turnLeft) }
-          Button("Forward", systemImage: "arrow.up") { model.apply(.forward) }
-          Button("Turn Right", systemImage: "arrow.clockwise") { model.apply(.turnRight) }
-          Button("Back", systemImage: "arrow.down") { model.apply(.backward) }
-          Divider()
-          Button("Fire", systemImage: "scope") { model.fire() }
-          Button("New Arena", systemImage: "dice") { model.newArena() }
+        .frame(width: 500, height: 250)
+
+        GroupBox("Original controls") {
+          Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 7) {
+            control("A", "about face", .turnAround)
+            control("S", "turn left", .turnLeft)
+            control("D", "forward one cell", .forward)
+            control("F", "turn right", .turnRight)
+            control("Space", "backward one cell", .backward)
+          }
+          Divider().padding(.vertical, 5)
+          HStack {
+            Button("Peek Left") { model.apply(.peekLeft) }
+            Button("Peek Right") { model.apply(.peekRight) }
+          }
+          Button("Stop Peeking") { model.stopPeeking() }
+            .disabled(!model.match.isPeeking)
+          Button("Fire (-1)", systemImage: "scope") { model.fire() }
+            .buttonStyle(.borderedProminent)
         }
-        .labelStyle(.iconOnly)
-        .buttonStyle(.bordered)
-        .padding(.bottom)
+        .frame(minWidth: 190)
       }
-      .onKeyPress { press in
-        switch press.characters.lowercased() {
-        case "w": model.apply(.forward)
-        case "s": model.apply(.backward)
-        case "a": model.apply(.turnLeft)
-        case "d": model.apply(.turnRight)
-        case " ": model.fire()
-        default: return .ignored
+
+      GroupBox("Scorecard") {
+        HStack {
+          Label("\(model.match.player.name) (you)", systemImage: "person.fill")
+          Spacer()
+          Text("\(model.match.player.score)").monospacedDigit()
         }
-        return .handled
+        ForEach(model.visiblePlayers) { player in
+          HStack {
+            Text(player.name)
+              .foregroundStyle(model.match.canSee(player) ? .orange : .primary)
+            Spacer()
+            Text("\(player.score)").monospacedDigit()
+          }
+        }
+        Divider()
+        HStack {
+          Text(model.statusMessage).foregroundStyle(.secondary)
+          Spacer()
+          Button(model.peers.isRunning ? "Nearby Session Active" : "Start Nearby Session") {
+            model.startNearbySession()
+          }
+          .disabled(model.peers.isRunning)
+          Button("Reset Local Game") { model.resetLocalGame() }
+        }
       }
     }
+    .padding()
+    .navigationTitle("Mazewar")
+  }
+
+  @ViewBuilder
+  private func control(_ key: String, _ label: String, _ action: PlayerAction) -> some View {
+    Text(key).font(.system(.body, design: .monospaced).weight(.semibold))
+    Button(label) { model.apply(action) }
+      .buttonStyle(.plain)
   }
 }

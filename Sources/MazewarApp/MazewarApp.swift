@@ -10,18 +10,27 @@ struct MazewarApp: App {
     }
     .commands {
       CommandMenu("Mazewar") {
-        Button("Move Forward") { model.apply(.forward) }
-          .keyboardShortcut("w")
-        Button("Move Backward") { model.apply(.backward) }
-          .keyboardShortcut("s")
-        Button("Turn Left") { model.apply(.turnLeft) }
+        Button("About Face") { model.apply(.turnAround) }
           .keyboardShortcut("a")
-        Button("Turn Right") { model.apply(.turnRight) }
+        Button("Turn Left") { model.apply(.turnLeft) }
+          .keyboardShortcut("s")
+        Button("Move Forward") { model.apply(.forward) }
           .keyboardShortcut("d")
-        Divider()
-        Button("Fire") { model.fire() }
+        Button("Turn Right") { model.apply(.turnRight) }
+          .keyboardShortcut("f")
+        Button("Move Backward") { model.apply(.backward) }
           .keyboardShortcut(.space, modifiers: [])
-        Button("New Arena") { model.newArena() }
+        Divider()
+        Button("Peek Left") { model.apply(.peekLeft) }
+          .keyboardShortcut("[")
+        Button("Peek Right") { model.apply(.peekRight) }
+          .keyboardShortcut("]")
+        Button("Stop Peeking") { model.stopPeeking() }
+          .keyboardShortcut("\\")
+        Button("Fire") { model.fire() }
+          .keyboardShortcut("r")
+        Divider()
+        Button("Reset Local Game") { model.resetLocalGame() }
           .keyboardShortcut("n")
       }
     }
