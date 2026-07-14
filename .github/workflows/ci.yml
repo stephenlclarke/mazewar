@@ -16,6 +16,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build, test, and check coverage
         run: make coverage-check
+      - name: Install SonarScanner
+        if: github.event_name == 'push' && github.repository == 'stephenlclarke/mazewar'
+        run: brew install sonar-scanner
       - name: Publish SonarQube analysis
         if: github.event_name == 'push' && github.repository == 'stephenlclarke/mazewar'
         env:
