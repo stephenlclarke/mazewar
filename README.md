@@ -42,8 +42,8 @@ badges to populate.
 
 ## Legacy source
 
-The original C/X11 implementation and its historical networking code remain in
-the repository as reference, but are not part of the Swift package.
+<!-- markdownlint-disable-next-line MD013 -->
+The original C/X11 implementation and its historical networking code live in [`original/`](original) as reference, but are not part of the Swift package.
 
 ## License
 
